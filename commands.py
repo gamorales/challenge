@@ -2,12 +2,13 @@ from dataclasses import dataclass
 
 from dialog import ShowMessageDialog
 from load_file import LoadIPFile
+from geoip import GeoIP
 
 params_q = {
-        "load": {"params": 1, "func": ""},
+        "load": 1,
         "find": 3,
         "rdap": 2,
-        "geoip": {"params": 1, "func": ""},
+        "geoip": 1,
 }
 
 
@@ -45,9 +46,23 @@ class Commands(object):
         msg.showMessage()
 
     def run_command(self):
-        qty = params_q.get(self.command, "").get("params", 0)
+        qty = params_q.get(self.command, 0)
         if self.validate_params_qty(self.command, len(self.params), qty):
-            print(f"COMANDO: {self.command}")
-            print(f"PARAMS: {self.params})")
-        else:
-            print("Error en el comando")
+
+            title = "Info"
+
+            if self.command == "load":
+                reader = LoadIPFile(self.params[0])
+                if not reader.get_ip_list():
+                    message = f"\n\nNo data has been loaded!",
+                    title = "Error"
+                else:
+                    message = f"\n\n{len(reader.get_ip_list())} IP addresses has been loaded!",
+
+            elif self.command == "geoip":
+                geo_ip = GeoIP(self.params[0])
+                message = "\n" + geo_ip.check_geoip()
+
+            msg = ShowMessageDialog(message=message, title=title)
+            msg.showMessage()
+

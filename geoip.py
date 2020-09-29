@@ -1,4 +1,5 @@
 import requests
+import json
 from dataclasses import dataclass
 
 # https://freegeoip.app/json/181.234.128.130
@@ -14,6 +15,6 @@ class GeoIP(object):
 
         if resp.status_code == 200:
             data = resp.json()
-            print(data)
+            return json.dumps(data, indent=4, sort_keys=True)
         else:
-            print(f"IP address {self.ip} is not real")
+            return f"IP address {self.ip} is not real"
