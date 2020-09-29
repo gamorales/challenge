@@ -1,9 +1,7 @@
 import curses
 
-from dialog import ShowMessageDialog
+from commands import Commands
 
-
-screen = None
 g = {}
 ENTER = [curses.KEY_ENTER, 10]
 DELETE = [curses.KEY_BACKSPACE, curses.KEY_DC, 8, 127, 263]
@@ -33,15 +31,6 @@ def close_window():
     curses.endwin()
 
 
-def print_help():
-    message = """
-help: Prints help dialog
-exit: Exits
-"""
-    msg = ShowMessageDialog(message=message, title='Challenge Help')
-    msg.showMessage()
-
-
 def main():
     word = ""
     shell = "challenge >>> "
@@ -68,7 +57,11 @@ def main():
             if word == "exit":
                 break
             elif word == "help":
-                print_help()
+                Commands.print_help()
+            elif len(word.strip().split(" ")) > 1:
+                word_list = word.split(" ")
+                cmd = Commands(word_list[0], word_list[1:])
+                cmd.run_command()
 
             # Touch the screen's end
             if y - g['height'] > -3:
@@ -76,14 +69,14 @@ def main():
             else:
                 screen.addstr(y+1, 0, shell, curses.color_pair(SHELL_COLOR))
 
-            word = ''
+            word = ""
 
         # Delete key
         elif event in DELETE:
             # Touch to line start
             if x < len(shell) + 1:
                 screen.move(y, x)
-                word = ''
+                word = ""
             # Midle of line
             else:
                 word = word[:-1]
