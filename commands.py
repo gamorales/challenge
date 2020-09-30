@@ -47,22 +47,27 @@ class Commands(object):
 
     def run_command(self):
         qty = params_q.get(self.command, 0)
-        if self.validate_params_qty(self.command, len(self.params), qty):
+        if qty == 0:
+            message = "\n\nInvalid command!"
+            title = "Error"
+        else:
+            if self.validate_params_qty(self.command, len(self.params), qty):
 
-            title = "Info"
+                title = "Info"
 
-            if self.command == "load":
-                reader = LoadIPFile(self.params[0])
-                if not reader.get_ip_list():
-                    message = f"\n\nNo data has been loaded!",
-                    title = "Error"
-                else:
-                    message = f"\n\n{len(reader.get_ip_list())} IP addresses has been loaded!",
+                if self.command == "load":
+                    reader = LoadIPFile(self.params[0])
+                    if not reader.get_ip_list():
+                        message = "\n\nNo data has been loaded!"
+                        title = "Error"
+                    else:
+                        message = f"\n\n{len(reader.get_ip_list())} IP addresses has been loaded!"
 
-            elif self.command == "geoip":
-                geo_ip = GeoIP(self.params[0])
-                message = "\n" + geo_ip.check_geoip()
+                elif self.command == "geoip":
+                    geo_ip = GeoIP(self.params[0])
+                    message = "\n\n" + geo_ip.check_geoip()
 
-            msg = ShowMessageDialog(message=message, title=title)
-            msg.showMessage()
+        msg = ShowMessageDialog(message=message, title=title)
+        msg.showMessage()
 
+        return message

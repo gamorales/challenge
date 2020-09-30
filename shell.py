@@ -59,9 +59,9 @@ def main():
             elif word == "help":
                 Commands.print_help()
             elif len(word.strip().split(" ")) > 1:
-                word_list = word.split(" ")
+                word_list = word.strip().split(" ")
                 cmd = Commands(word_list[0], word_list[1:])
-                cmd.run_command()
+                screen.addstr("\n\n"+cmd.run_command(), curses.color_pair(curses.COLOR_WHITE))
 
             # Touch the screen's end
             if y - g['height'] > -3:
