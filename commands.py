@@ -35,9 +35,9 @@ class Commands(object):
         message = """
         load <file>: Load file into memory.
         print [<var>]: Print a list with IPs in memory.
-        geoip [<ip> | <range> | all]: Geo-location lookup tool. Ej: range(0:10)
-        rdap [<ip> | <range> | all]: Registration data access search for IP. Ej: range(0:10)
-        find <regex:ip>: A regex query to search IP addresses. Ej: find .*50
+        geoip [<ip> | <range> | all]: Geo-location lookup tool. e.g.: range(0:10)
+        rdap [<ip> | <range> | all]: Registration data access search for IP. e.g.: range(0:10)
+        find <regex:ip>: A regex query to search IP addresses. e.g.: find .*50
         help: Prints help dialog.
         exit: Exit.
         """
