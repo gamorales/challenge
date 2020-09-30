@@ -8,10 +8,10 @@ from lookup_ip import LookupIP
 
 # Number of parameters per function
 PARAMS_QTY = {
-        "load": 1,
-        "find": 1,
-        "rdap": 1,
-        "geoip": 1,
+        "load": [1],
+        "filter": [1],
+        "rdap": [1, 2],
+        "geoip": [1, 2],
 }
 
 
@@ -25,26 +25,27 @@ class Commands(object):
     def validate_params_qty(self, command, params_qty, valid_qty):
         """ Check if params quantity is ok """
 
-        if params_qty != valid_qty:
-            return False
+        if params_qty in valid_qty:
+            return True
 
-        return True
+        return False
 
     @staticmethod
     def print_help():
         message = """
         load <file>: Load file into memory.
         print [<var>]: Print a list with IPs in memory.
-        geoip [<ip> | <range> | all]: Geo-location lookup tool. e.g.: range(0:10)
-        rdap [<ip> | <range> | all]: Registration data access search for IP. e.g.: range(0:10)
-        find <regex:ip>: A regex query to search IP addresses. e.g.: find .*50
+        geoip [<ip> | <range> [<var>] | all]: Geo-location lookup tool. e.g.: range(0:10)
+        rdap [<ip> | <range> [<var>] | all]: Registration data access search for IP. e.g.: range(0:10)
+        filter <regex:ip>: A regex query to search IP addresses. e.g.: filter .*50
         help: Prints help dialog.
         exit: Exit.
         """
         print(message)
 
-    def get_lookup_data(self, response):
+    def get_lookup_data(self, response, filtered):
         """ Get information from RDAP and GeoIP webpages """
+
         if self.params[0] == "all":
             if response.get("data", []):
                 lookup_ip = LookupIP(
@@ -55,20 +56,24 @@ class Commands(object):
                 return False
         elif self.params[0].startswith("range"):
             if response.get("data", []):
-                range_found = re.search('\((.+?)\)', self.params[0])
+                range_found = re.search("\((.+?)\)", self.params[0])
                 if range_found:
                     range_list = range_found.group(1).split(":")
 
+                    ip_range_list = response.get("data", []) if len(self.params) == 1 else filtered[self.params[1]]
+
                     if len(range_list) > 1:
                         lookup_ip = LookupIP(
-                            response.get("data", []),
+                            #response.get("data", []),
+                            ip_range_list,
                             self.command,
                             start=int(range_list[0]),
                             end=int(range_list[1])
                         )
                     else:
                         lookup_ip = LookupIP(
-                            response.get("data", []),
+                            #response.get("data", []),
+                            ip_range_list,
                             self.command,
                             start=0,
                             end=int(range_list[0])
@@ -101,7 +106,7 @@ class Commands(object):
                         message = "No data has been loaded!"
                     else:
                         message = f"{len(self.data)} IP addresses has been loaded!"
-                elif self.command == "find":
+                elif self.command == "filter":
                     self.filtered_data = filtered
 
                     filtered_ips = QueryFilter(
@@ -115,7 +120,7 @@ class Commands(object):
                     self.data = response.get("data", [])
 
                 elif self.command in ["geoip", "rdap"]:
-                    lookup_ip = self.get_lookup_data(response)
+                    lookup_ip = self.get_lookup_data(response, filtered)
 
                     if lookup_ip:
                         lookup_ip.check_ip_list()
@@ -125,6 +130,7 @@ class Commands(object):
                     else:
                         message = "No data has been loaded!"
 
+                    self.filtered_data = filtered
             else:
                 message = f"Invalid syntax for command <{self.command}>.\n"
                 message += "Type help for more info."

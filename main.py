@@ -20,9 +20,7 @@ def main():
                 Commands.print_help()
             elif word.startswith("print"):
                 if len(params) > 1:
-                    key = params[1]
-                    print(key)
-                    print(response.get('filter').get(key, {}))
+                    print(response.get('filter').get(params[1], {}))
                 else:
                     if response.get("data", []):
                         print(f"\n{response.get('data')}")

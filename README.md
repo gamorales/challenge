@@ -28,6 +28,6 @@ The application runs like a command-line interface, these are the commands that 
 * print [&lt;var&gt;]: Print a list with IPs in memory. e.g.: print A1
 * geoip [&lt;ip&gt; | &lt;range&gt; | all]: Geo-location lookup tool. e.g.: range(0:10)
 * rdap [&lt;ip&gt; | &lt;range&gt; | all]: Registration data access search for IP. e.g.: range(0:10)
-* find &lt;regex:ip&gt;: A regex query to search IP addresses. e.g.: find .*50
+* filter &lt;regex:ip&gt;: A regex query to search IP addresses. e.g.: filter .*50
 * help: Prints help dialog.
 * exit: Exit.
