@@ -22,7 +22,7 @@ python3 main.py
 ``` 
 
 ## Commands
-The application runs like a command-line interface, these are the commands that allows work with the loaded IPs 
+The application runs like a command-line interface, these are the allowed commands that works with the loaded IPs 
 
 
 * load &lt;file&gt;: Load file into memory.
