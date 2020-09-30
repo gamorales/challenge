@@ -24,10 +24,10 @@ python3 main.py
 ## Commands
 The application runs like a command-line interface, these are the commands that allows work with the loaded IPs 
 
-* load <file>: Load file into memory.
-* print: Print a list with IPs in memory.
-* geoip [<ip> | <range> | all]: Geo-location lookup tool. Ej: range(0:10)
-* rdap [<ip> | <range> | all]: Registration data access search for IP. Ej: range(0:10)
-* find <regex:ip>: A regex query to search IP addresses. Ej: find .*50
+* load &lt;file&gt;: Load file into memory.
+* print [&lt;var&gt;]: Print a list with IPs in memory.
+* geoip [&lt;ip&gt; | &lt;range&gt; | all]: Geo-location lookup tool. Ej: range(0:10)
+* rdap [&lt;ip&gt; | &lt;range&gt; | all]: Registration data access search for IP. Ej: range(0:10)
+* find &lt;regex:ip&gt;: A regex query to search IP addresses. Ej: find .*50
 * help: Prints help dialog.
 * exit: Exit.
