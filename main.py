@@ -12,21 +12,26 @@ def main():
     while True:
         try:
             word = input(f"{SHELL}challenge >>>{ENDC} ").lower()
+            params = word.strip().split(" ")
 
             if word == "exit":
                 break
             elif word == "help":
                 Commands.print_help()
-            elif len(word.strip().split(" ")) > 1:
-                word_list = word.strip().split(" ")
-                cmd = Commands(word_list[0], word_list[1:])
+            elif word.startswith("print"):
+                if len(params) > 1:
+                    key = params[1]
+                    print(key)
+                    print(response.get('filter').get(key, {}))
+                else:
+                    if response.get("data", []):
+                        print(f"\n{response.get('data')}")
+                    else:
+                        print(f"\nNo data loaded!")
+            elif len(params) > 1:
+                cmd = Commands(params[0], params[1:])
                 response = cmd.run_command(response)
                 print("\n"+str(response.get("msg", ""))+"")
-            elif word == "print":
-                if response.get("data", []):
-                    print(f"\n{response.get('data')}")
-                else:
-                    print(f"\n{response.get('msg')}")
             else:
                 print(word)
         except KeyboardInterrupt:
