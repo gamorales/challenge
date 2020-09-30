@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from dialog import ShowMessageDialog
 from load_file import LoadIPFile
 from lookup_ip import LookupIP
 
-params_q = {
+# Number of parameters per function
+PARAMS_QTY = {
         "load": 1,
         "find": 3,
         "rdap": 1,
@@ -16,11 +17,11 @@ params_q = {
 class Commands(object):
     command: str
     params: list
+    data: list = field(default_factory=list)
 
     def validate_params_qty(self, command, params_qty, valid_qty):
-        """
-        Check if the params quantity is ok
-        """
+        """ Check if params quantity is ok """
+
         if params_qty != valid_qty:
             msg = ShowMessageDialog(
                 message=f"\n\nInvalid syntax for command <{command}>."
@@ -46,7 +47,9 @@ class Commands(object):
         msg.showMessage()
 
     def run_command(self):
-        qty = params_q.get(self.command, 0)
+        """ Run commands """
+
+        qty = PARAMS_QTY.get(self.command, 0)
         if qty == 0:
             message = "\n\nInvalid command!"
             title = "Error"
@@ -57,11 +60,13 @@ class Commands(object):
 
                 if self.command == "load":
                     reader = LoadIPFile(self.params[0])
-                    if not reader.get_ip_list():
+                    reader.read_ip_list()
+                    self.data = reader.get_ip_list()
+                    if not self.data:
                         message = "\n\nNo data has been loaded!"
                         title = "Error"
                     else:
-                        message = f"\n\n{len(reader.get_ip_list())} IP addresses has been loaded!"
+                        message = f"\n\n{len(self.data)} IP addresses has been loaded!"
 
                 elif self.command in ["geoip", "rdap"]:
                     lookup_ip = LookupIP(self.params[0], self.command)
@@ -77,4 +82,4 @@ class Commands(object):
         msg = ShowMessageDialog(message=message, title=title)
         msg.showMessage()
 
-        return message
+        return {"msg": message, "data": self.data[0:1500]}

@@ -61,7 +61,8 @@ def main():
             elif len(word.strip().split(" ")) > 1:
                 word_list = word.strip().split(" ")
                 cmd = Commands(word_list[0], word_list[1:])
-                screen.addstr("\n\n"+cmd.run_command(), curses.color_pair(curses.COLOR_WHITE))
+                response = cmd.run_command()
+                screen.addstr("\n\n"+str(response.get("data", "")), curses.color_pair(curses.COLOR_WHITE))
 
             # Touch the screen's end
             if y - g['height'] > -3:

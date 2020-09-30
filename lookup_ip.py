@@ -14,6 +14,8 @@ class LookupIP(object):
     ]
 
     def get_important_keys(self, response):
+        """ Extract just a few keys from endpoints response"""
+
         resp = json.loads(response)
         return json.dumps(
                 dict((k, resp[k]) for k in self.important_keys if k in resp),
@@ -21,6 +23,8 @@ class LookupIP(object):
         )
 
     def check_ip(self):
+        """ Consume endpoints for GeoIP and RDAP"""
+
         if "geoip" in self.type_lookup:
             url = f"https://freegeoip.app/json/{self.ip}"
         else:
