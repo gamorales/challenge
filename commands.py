@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass, field
 
 from dialog import ShowMessageDialog
@@ -38,9 +39,9 @@ class Commands(object):
         message = """
         load <file>: Load file into memory
         print: Print a list with IPs loaded
-        geoip <ip>: Geo-location lookup tool
-        rdap <ip>: Registration data access search for IP
-        find <ip>: A regex query to search IP address
+        geoip [<ip> | <range> | all]: Geo-location lookup tool. Ej: range(0:10)
+        rdap [<ip> | <range> | all]: Registration data access search for IP. Ej: range(0:10)
+        find <regex:ip>: A regex query to search IP address
         help: Prints help dialog
         exit: Exit
         """
@@ -66,18 +67,41 @@ class Commands(object):
 
                 elif self.command in ["geoip", "rdap"]:
                     if self.params[0] == "all":
-                        lookup_ip = LookupIP(response.get("data", []), self.command)
+                        lookup_ip = LookupIP(
+                            response.get("data", []),
+                            self.command
+                        )
+                    elif self.params[0].startswith("range"):
+                        range_found = re.search('\((.+?)\)', self.params[0])
+                        if range_found:
+                            range_list = range_found.group(1).split(":")
+
+                            if len(range_list) > 1:
+                                lookup_ip = LookupIP(
+                                    response.get("data", []),
+                                    self.command,
+                                    start=int(range_list[0]),
+                                    end=int(range_list[1])
+                                )
+                            else:
+                                lookup_ip = LookupIP(
+                                    response.get("data", []),
+                                    self.command,
+                                    start=0,
+                                    end=int(range_list[0])
+                                )
                     else:
                         lookup_ip = LookupIP([self.params[0]], self.command)
 
                     ip_list = lookup_ip.check_ip_list()
-                    self.data = response
+                    self.data = response.get("data", [])
 
                     if self.command == "rdap":
                         lookup_ip.important_keys = [
                                 "handle", "startAddress", "endAddress",
                                 "ipVersion", "type"
                         ]
+
                     lookup_ip.get_important_keys(ip_list)
                     message = ""
 

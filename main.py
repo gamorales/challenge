@@ -11,7 +11,7 @@ def main():
 
     while True:
         try:
-            word = input(f"{SHELL}challenge >>>{ENDC} ")
+            word = input(f"{SHELL}challenge >>>{ENDC} ").lower()
 
             if word == "exit":
                 break

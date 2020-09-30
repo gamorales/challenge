@@ -13,22 +13,28 @@ class LookupIP(object):
             "city", "zip_code", "time_zone", "latitude", "longitude",
             "metro_code"
     ]
+    start: int = 0
+    end: int = 0
 
     def get_important_keys(self, response):
         """ Extract just a few keys from endpoints response"""
-
-        for record in response:
-            resp = json.loads(record)
-            print(json.dumps(
-                dict((k, resp[k]) for k in self.important_keys if k in resp),
-                indent=4, sort_keys=True
-            ))
+        if response is not None:
+            for record in response:
+                resp = json.loads(record)
+                print(json.dumps(
+                    dict((k, resp[k]) for k in self.important_keys if k in resp),
+                    indent=4, sort_keys=True
+                ))
 
     def check_ip_list(self):
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.map(self.check_ip, self.ip_list)
-
-        #return list(map(self.check_ip, self.ip_list))
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            if self.end > 0 and self.start >= 0:
+                executor.map(
+                    self.check_ip,
+                    self.ip_list[self.start:self.end]
+                )
+            else:
+                executor.map(self.check_ip, self.ip_list)
 
     def check_ip(self, ip):
         """ Consume endpoints for GeoIP and RDAP"""
