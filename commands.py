@@ -37,49 +37,48 @@ class Commands(object):
     def print_help():
         message = """
         load <file>: Load file into memory
-        find <ip>: A regex query to search IP address
-        rdap <ip>: Registration data access search for IP
+        print: Print a list with IPs loaded
         geoip <ip>: Geo-location lookup tool
+        rdap <ip>: Registration data access search for IP
+        find <ip>: A regex query to search IP address
         help: Prints help dialog
         exit: Exit
         """
-        msg = ShowMessageDialog(message=message, title='Challenge Help')
-        msg.showMessage()
+        print(message)
 
-    def run_command(self):
+    def run_command(self, response):
         """ Run commands """
 
         qty = PARAMS_QTY.get(self.command, 0)
         if qty == 0:
-            message = "\n\nInvalid command!"
-            title = "Error"
+            message = "Invalid command!"
         else:
             if self.validate_params_qty(self.command, len(self.params), qty):
-
-                title = "Info"
 
                 if self.command == "load":
                     reader = LoadIPFile(self.params[0])
                     reader.read_ip_list()
                     self.data = reader.get_ip_list()
                     if not self.data:
-                        message = "\n\nNo data has been loaded!"
-                        title = "Error"
+                        message = "No data has been loaded!"
                     else:
-                        message = f"\n\n{len(self.data)} IP addresses has been loaded!"
+                        message = f"{len(self.data)} IP addresses has been loaded!"
 
                 elif self.command in ["geoip", "rdap"]:
-                    lookup_ip = LookupIP(self.params[0], self.command)
-                    data = lookup_ip.check_ip()
+                    if self.params[0] == "all":
+                        lookup_ip = LookupIP(response.get("data", []), self.command)
+                    else:
+                        lookup_ip = LookupIP([self.params[0]], self.command)
+
+                    ip_list = lookup_ip.check_ip_list()
+                    self.data = response
 
                     if self.command == "rdap":
                         lookup_ip.important_keys = [
-                                "handle", "startAddress", "endAddress", 
+                                "handle", "startAddress", "endAddress",
                                 "ipVersion", "type"
                         ]
-                    message = "\n\n" + str(lookup_ip.get_important_keys(data))
+                    lookup_ip.get_important_keys(ip_list)
+                    message = ""
 
-        msg = ShowMessageDialog(message=message, title=title)
-        msg.showMessage()
-
-        return {"msg": message, "data": self.data[0:1500]}
+        return {"msg": message, "data": self.data}

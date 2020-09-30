@@ -1,11 +1,12 @@
 import requests
 import json
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
 
 
 @dataclass
 class LookupIP(object):
-    ip: str
+    ip_list: list
     type_lookup: str = "geoip"
     important_keys = [
             "ip", "country_code", "country_name", "region_code", "region_name",
@@ -16,24 +17,30 @@ class LookupIP(object):
     def get_important_keys(self, response):
         """ Extract just a few keys from endpoints response"""
 
-        resp = json.loads(response)
-        return json.dumps(
+        for record in response:
+            resp = json.loads(record)
+            print(json.dumps(
                 dict((k, resp[k]) for k in self.important_keys if k in resp),
                 indent=4, sort_keys=True
-        )
+            ))
 
-    def check_ip(self):
+    def check_ip_list(self):
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.map(self.check_ip, self.ip_list)
+
+        #return list(map(self.check_ip, self.ip_list))
+
+    def check_ip(self, ip):
         """ Consume endpoints for GeoIP and RDAP"""
-
         if "geoip" in self.type_lookup:
-            url = f"https://freegeoip.app/json/{self.ip}"
+            url = f"https://freegeoip.app/json/{ip}"
         else:
-            url = f"https://rdap.lacnic.net/rdap/ip/{self.ip}"
+            url = f"https://rdap.lacnic.net/rdap/ip/{ip}"
 
         resp = requests.get(url)
 
         if resp.status_code == 200:
             data = resp.json()
-            return json.dumps(data, indent=4, sort_keys=True)
+            print(json.dumps(data, indent=4, sort_keys=True))
         else:
-            return f"IP address {self.ip} is not real"
+            print(f"IP address {ip} is not ok!")
