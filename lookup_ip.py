@@ -8,23 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 class LookupIP(object):
     ip_list: list
     type_lookup: str = "geoip"
-    important_keys = [
-            "ip", "country_code", "country_name", "region_code", "region_name",
-            "city", "zip_code", "time_zone", "latitude", "longitude",
-            "metro_code"
-    ]
     start: int = 0
     end: int = 0
-
-    def get_important_keys(self, response):
-        """ Extract just a few keys from endpoints response"""
-        if response is not None:
-            for record in response:
-                resp = json.loads(record)
-                print(json.dumps(
-                    dict((k, resp[k]) for k in self.important_keys if k in resp),
-                    indent=4, sort_keys=True
-                ))
 
     def check_ip_list(self):
         with ThreadPoolExecutor(max_workers=4) as executor:

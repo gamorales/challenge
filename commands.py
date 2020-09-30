@@ -47,6 +47,42 @@ class Commands(object):
         """
         print(message)
 
+    def get_data(self, response):
+        if self.params[0] == "all":
+            if response.get("data", []):
+                lookup_ip = LookupIP(
+                    response.get("data", []),
+                    self.command
+                )
+            else:
+                return False
+        elif self.params[0].startswith("range"):
+            if response.get("data", []):
+                range_found = re.search('\((.+?)\)', self.params[0])
+                if range_found:
+                    range_list = range_found.group(1).split(":")
+
+                    if len(range_list) > 1:
+                        lookup_ip = LookupIP(
+                            response.get("data", []),
+                            self.command,
+                            start=int(range_list[0]),
+                            end=int(range_list[1])
+                        )
+                    else:
+                        lookup_ip = LookupIP(
+                            response.get("data", []),
+                            self.command,
+                            start=0,
+                            end=int(range_list[0])
+                        )
+            else:
+                return False
+        else:
+            lookup_ip = LookupIP([self.params[0]], self.command)
+
+        return lookup_ip
+
     def run_command(self, response):
         """ Run commands """
 
@@ -66,43 +102,14 @@ class Commands(object):
                         message = f"{len(self.data)} IP addresses has been loaded!"
 
                 elif self.command in ["geoip", "rdap"]:
-                    if self.params[0] == "all":
-                        lookup_ip = LookupIP(
-                            response.get("data", []),
-                            self.command
-                        )
-                    elif self.params[0].startswith("range"):
-                        range_found = re.search('\((.+?)\)', self.params[0])
-                        if range_found:
-                            range_list = range_found.group(1).split(":")
+                    lookup_ip = self.get_data(response)
 
-                            if len(range_list) > 1:
-                                lookup_ip = LookupIP(
-                                    response.get("data", []),
-                                    self.command,
-                                    start=int(range_list[0]),
-                                    end=int(range_list[1])
-                                )
-                            else:
-                                lookup_ip = LookupIP(
-                                    response.get("data", []),
-                                    self.command,
-                                    start=0,
-                                    end=int(range_list[0])
-                                )
+                    if lookup_ip:
+                        lookup_ip.check_ip_list()
+                        self.data = response.get("data", [])
+
+                        message = "IPs has been consulted!"
                     else:
-                        lookup_ip = LookupIP([self.params[0]], self.command)
-
-                    ip_list = lookup_ip.check_ip_list()
-                    self.data = response.get("data", [])
-
-                    if self.command == "rdap":
-                        lookup_ip.important_keys = [
-                                "handle", "startAddress", "endAddress",
-                                "ipVersion", "type"
-                        ]
-
-                    lookup_ip.get_important_keys(ip_list)
-                    message = ""
+                        message = "No data has been loaded!"
 
         return {"msg": message, "data": self.data}
