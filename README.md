@@ -16,7 +16,7 @@ pip3 install -r requirements.txt
 ```
 
 ## Usage
-Once everything had been installed correctly, must executed the main.py file:
+Once everything has been installed correctly, must executed the main.py file:
 ```
 python3 main.py
 ``` 
