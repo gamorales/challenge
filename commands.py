@@ -34,7 +34,7 @@ class Commands(object):
     def print_help():
         message = """
         load <file>: Load file into memory.
-        print: Print a list with IPs in memory.
+        print [<var>]: Print a list with IPs in memory.
         geoip [<ip> | <range> | all]: Geo-location lookup tool. Ej: range(0:10)
         rdap [<ip> | <range> | all]: Registration data access search for IP. Ej: range(0:10)
         find <regex:ip>: A regex query to search IP addresses. Ej: find .*50
