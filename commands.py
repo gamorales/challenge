@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 from dialog import ShowMessageDialog
 from load_file import LoadIPFile
-from geoip import GeoIP
+from lookup_ip import LookupIP
 
 params_q = {
         "load": 1,
         "find": 3,
-        "rdap": 2,
+        "rdap": 1,
         "geoip": 1,
 }
 
@@ -63,9 +63,16 @@ class Commands(object):
                     else:
                         message = f"\n\n{len(reader.get_ip_list())} IP addresses has been loaded!"
 
-                elif self.command == "geoip":
-                    geo_ip = GeoIP(self.params[0])
-                    message = "\n\n" + geo_ip.check_geoip()
+                elif self.command in ["geoip", "rdap"]:
+                    lookup_ip = LookupIP(self.params[0], self.command)
+                    data = lookup_ip.check_ip()
+
+                    if self.command == "rdap":
+                        lookup_ip.important_keys = [
+                                "handle", "startAddress", "endAddress", 
+                                "ipVersion", "type"
+                        ]
+                    message = "\n\n" + str(lookup_ip.get_important_keys(data))
 
         msg = ShowMessageDialog(message=message, title=title)
         msg.showMessage()
