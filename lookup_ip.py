@@ -17,14 +17,16 @@ class LookupIP(object):
             if self.end > 0 and self.start >= 0:
                 future_list = {executor.submit(self.check_ip, ip): ip for ip in self.ip_list[self.start:self.end]}
                 for _ in as_completed(future_list):
-                    checked_list.append(_.result())
-                    print(_.result())
+                    if _.result():
+                        checked_list.append(_.result())
+                        print(_.result())
 
             else:
                 future_list = {executor.submit(self.check_ip, ip): ip for ip in self.ip_list}
                 for _ in as_completed(future_list):
-                    checked_list.append(_.result())
-                    print(_.result())
+                    if _.result():
+                        checked_list.append(_.result())
+                        print(_.result())
 
                 executor.map(self.check_ip, self.ip_list)
 
