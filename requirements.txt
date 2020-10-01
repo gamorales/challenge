@@ -5,3 +5,4 @@ pyfiglet==0.8.post1
 pythondialog==3.5.1
 requests==2.24.0
 urllib3==1.25.10
+PyYAML==5.3.1
