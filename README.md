@@ -26,9 +26,10 @@ The application runs like a command-line interface, these are the allowed comman
 
 
 * load &lt;file&gt;: Load file into memory.
-* print [&lt;var&gt;]: Print a list with IPs in memory. e.g. print A1
-* geoip [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Geo-location lookup tool. e.g.: geoip range(0:10) A1
-* rdap [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Registration data access search for IP. e.g.: rdap range(0) A2
+* print [&lt;var&gt;]: Print a list with IPs in memory.
+* geoip [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Geo-location lookup tool. e.g.: range(0:10)
+* rdap [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Registration data access search for IP. e.g.: range(0:10)
 * filter &lt;regex:ip&gt;: A regex query to search IP addresses. e.g.: filter .*50
+* save (&lt;var&gt; | all) &lt;type&gt; &lt;filename&gt; [&lt;filetype&gt;]: Save data into a file (default JSON). e.g. save all geoip file json
 * help: Prints help dialog.
 * exit: Exit.

@@ -42,11 +42,11 @@ class Commands(object):
         geoip [<ip> | <range> [<var>] | all]: Geo-location lookup tool. e.g.: range(0:10)
         rdap [<ip> | <range> [<var>] | all]: Registration data access search for IP. e.g.: range(0:10)
         filter <regex:ip>: A regex query to search IP addresses. e.g.: filter .*50
-        save <data> <type> <filename> [<filetype>]: Save data into a file (default JSON). e.g. save all geoip file json
+        save (<var> | all) <type> <filename> [<filetype>]: Save data into a file (default JSON). e.g. save all geoip file json
         help: Prints help dialog.
         exit: Exit.
         """
-        print(me ssage)
+        print(message)
 
     def get_lookup_data(self, response, filtered):
         """  Get information from RDAP and GeoIP webpages """
@@ -129,29 +129,39 @@ class Commands(object):
         return message
 
     def save_data(self, data, command, filename, filetype="json"):
-        if filetype not in ["json", "csv", "txt", "yaml"]:
+        if filetype not in ["json", "csv", "yaml"]:
             return "Filetype not allowed!"
         else:
-            print(data)
             lookup_ip = LookupIP(data, command)
+            if lookup_ip:
+                lookup_data = lookup_ip.check_ip_list()
 
-            with open(f"{filename}.{filetype}", "w") as outfile:
-                if filetype == "json":
-                    json.dump(data, outfile, indent=4, sort_keys=True)
-                elif filetype == "yaml":
-                    yaml.dump(data, outfile)
-                elif filetype == "txt":
-                    csv.writer(outfile, delimiter=' ')
-                elif filetype == "csv":
-                    writer = csv.DictWriter(outfile, fieldnames=data.keys())
-                    writer.writeheader()
-                    for index in data:
-                        writer.writerow(index)
+                with open(f"{filename}.{filetype}", "w") as outfile:
+                    if filetype == "json":
+                        outfile.write("[\n")
+                        for _ in lookup_data:
+                            json.dump(eval(_), outfile, indent=4, sort_keys=True)
+                            outfile.write(",")
+                        outfile.write("]")
+                    elif filetype == "yaml":
+                        for _ in lookup_data:
+                            yaml.dump(eval(_), outfile)
+                    elif filetype == "csv":
+                        writer = csv.DictWriter(outfile, fieldnames=lookup_data.keys())
+                        writer.writeheader()
+                        for index in lookup_data:
+                            writer.writerow(index)
 
-            return "File created successfully!"
+                message = "File created successfully!"
+            else:
+                message = "No data has been loaded!"
+
+            return message
 
     def run_command(self, response, filtered={}):
         """ Run commands """
+        self.data = response.get("data", [])
+        self.filtered_data = filtered
 
         qty = PARAMS_QTY.get(self.command, 0)
         if qty == 0:
@@ -183,7 +193,6 @@ class Commands(object):
                             self.params[1],
                             self.params[2],
                             self.params[3]
-
                         )
             else:
                 message = f"Invalid syntax for command <{self.command}>.\n"

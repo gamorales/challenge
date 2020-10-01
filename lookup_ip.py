@@ -20,10 +20,15 @@ class LookupIP(object):
                     checked_list.append(_.result())
                     print(_.result())
 
-                print(checked_list)
-                return checked_list
             else:
+                future_list = {executor.submit(self.check_ip, ip): ip for ip in self.ip_list}
+                for _ in as_completed(future_list):
+                    checked_list.append(_.result())
+                    print(_.result())
+
                 executor.map(self.check_ip, self.ip_list)
+
+            return checked_list
 
     def check_ip(self, ip):
         """ Consume endpoints for GeoIP and RDAP"""
