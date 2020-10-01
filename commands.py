@@ -1,3 +1,6 @@
+import json
+import csv
+import yaml
 import re
 from dataclasses import dataclass, field
 
@@ -8,10 +11,11 @@ from lookup_ip import LookupIP
 
 # Number of parameters per function
 PARAMS_QTY = {
-        "load": [1],
-        "filter": [1],
-        "rdap": [1, 2],
-        "geoip": [1, 2],
+    "load": [1],
+    "filter": [1],
+    "rdap": [1, 2],
+    "geoip": [1, 2],
+    "save": [4]
 }
 
 
@@ -38,13 +42,14 @@ class Commands(object):
         geoip [<ip> | <range> [<var>] | all]: Geo-location lookup tool. e.g.: range(0:10)
         rdap [<ip> | <range> [<var>] | all]: Registration data access search for IP. e.g.: range(0:10)
         filter <regex:ip>: A regex query to search IP addresses. e.g.: filter .*50
+        save <data> <type> <filename> [<filetype>]: Save data into a file (default JSON). e.g. save all geoip file json
         help: Prints help dialog.
         exit: Exit.
         """
-        print(message)
+        print(me ssage)
 
     def get_lookup_data(self, response, filtered):
-        """ Get information from RDAP and GeoIP webpages """
+        """  Get information from RDAP and GeoIP webpages """
 
         if self.params[0] == "all":
             if response.get("data", []):
@@ -64,7 +69,6 @@ class Commands(object):
 
                     if len(range_list) > 1:
                         lookup_ip = LookupIP(
-                            #response.get("data", []),
                             ip_range_list,
                             self.command,
                             start=int(range_list[0]),
@@ -72,7 +76,6 @@ class Commands(object):
                         )
                     else:
                         lookup_ip = LookupIP(
-                            #response.get("data", []),
                             ip_range_list,
                             self.command,
                             start=0,
@@ -125,6 +128,28 @@ class Commands(object):
 
         return message
 
+    def save_data(self, data, command, filename, filetype="json"):
+        if filetype not in ["json", "csv", "txt", "yaml"]:
+            return "Filetype not allowed!"
+        else:
+            print(data)
+            lookup_ip = LookupIP(data, command)
+
+            with open(f"{filename}.{filetype}", "w") as outfile:
+                if filetype == "json":
+                    json.dump(data, outfile, indent=4, sort_keys=True)
+                elif filetype == "yaml":
+                    yaml.dump(data, outfile)
+                elif filetype == "txt":
+                    csv.writer(outfile, delimiter=' ')
+                elif filetype == "csv":
+                    writer = csv.DictWriter(outfile, fieldnames=data.keys())
+                    writer.writeheader()
+                    for index in data:
+                        writer.writerow(index)
+
+            return "File created successfully!"
+
     def run_command(self, response, filtered={}):
         """ Run commands """
 
@@ -144,6 +169,22 @@ class Commands(object):
                     message = self.set_filtered_data(response, filtered)
                 elif self.command in ["geoip", "rdap"]:
                     message = self.lookup_data(response, filtered)
+                elif self.command == "save":
+                    if self.params[0] == "all":
+                        message = self.save_data(
+                            response.get("data", []),
+                            self.params[1],
+                            self.params[2],
+                            self.params[3]
+                        )
+                    else:
+                        message = self.save_data(
+                            filtered[self.params[0]],
+                            self.params[1],
+                            self.params[2],
+                            self.params[3]
+
+                        )
             else:
                 message = f"Invalid syntax for command <{self.command}>.\n"
                 message += "Type help for more info."

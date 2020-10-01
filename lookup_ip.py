@@ -1,7 +1,7 @@
 import requests
 import json
 from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 @dataclass
@@ -12,12 +12,16 @@ class LookupIP(object):
     end: int = 0
 
     def check_ip_list(self):
+        checked_list = []
         with ThreadPoolExecutor(max_workers=4) as executor:
             if self.end > 0 and self.start >= 0:
-                executor.map(
-                    self.check_ip,
-                    self.ip_list[self.start:self.end]
-                )
+                future_list = {executor.submit(self.check_ip, ip): ip for ip in self.ip_list[self.start:self.end]}
+                for _ in as_completed(future_list):
+                    checked_list.append(_.result())
+                    print(_.result())
+
+                print(checked_list)
+                return checked_list
             else:
                 executor.map(self.check_ip, self.ip_list)
 
@@ -32,6 +36,6 @@ class LookupIP(object):
 
         if resp.status_code == 200:
             data = resp.json()
-            print(json.dumps(data, indent=4, sort_keys=True))
+            return json.dumps(data, indent=4, sort_keys=True)
         else:
             print(f"IP address {ip} is not ok!")
