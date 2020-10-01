@@ -85,6 +85,46 @@ class Commands(object):
 
         return lookup_ip
 
+    def load_file(self):
+        reader = LoadIPFile(self.params[0])
+        reader.read_ip_list()
+        self.data = reader.get_ip_list()
+        if not self.data:
+            message = "No data has been loaded!"
+        else:
+            message = f"{len(self.data)} IP addresses has been loaded!"
+
+        return message
+
+    def set_filtered_data(self, response, filtered):
+        self.filtered_data = filtered
+
+        filtered_ips = QueryFilter(
+            response.get("data", []),
+            self.params[0]
+        )
+        filtered_ips.filter_ips()
+        self.filtered_data[f"a{len(self.filtered_data)+1}"] = filtered_ips.get_filtered_ips()
+
+        self.data = response.get("data", [])
+
+        return f"Filtered data in var A{len(self.filtered_data)}"
+
+    def lookup_data(self, response, filtered):
+        lookup_ip = self.get_lookup_data(response, filtered)
+
+        if lookup_ip:
+            lookup_ip.check_ip_list()
+            self.data = response.get("data", [])
+
+            message = "IPs has been consulted!"
+        else:
+            message = "No data has been loaded!"
+
+        self.filtered_data = filtered
+
+        return message
+
     def run_command(self, response, filtered={}):
         """ Run commands """
 
@@ -99,38 +139,11 @@ class Commands(object):
             )
             if params_qty:
                 if self.command == "load":
-                    reader = LoadIPFile(self.params[0])
-                    reader.read_ip_list()
-                    self.data = reader.get_ip_list()
-                    if not self.data:
-                        message = "No data has been loaded!"
-                    else:
-                        message = f"{len(self.data)} IP addresses has been loaded!"
+                    message = self.load_file()
                 elif self.command == "filter":
-                    self.filtered_data = filtered
-
-                    filtered_ips = QueryFilter(
-                        response.get("data", []),
-                        self.params[0]
-                    )
-                    filtered_ips.filter_ips()
-                    self.filtered_data[f"a{len(self.filtered_data)+1}"] = filtered_ips.get_filtered_ips()
-
-                    message = f"Filtered data in var A{len(self.filtered_data)}"
-                    self.data = response.get("data", [])
-
+                    message = self.set_filtered_data(response, filtered)
                 elif self.command in ["geoip", "rdap"]:
-                    lookup_ip = self.get_lookup_data(response, filtered)
-
-                    if lookup_ip:
-                        lookup_ip.check_ip_list()
-                        self.data = response.get("data", [])
-
-                        message = "IPs has been consulted!"
-                    else:
-                        message = "No data has been loaded!"
-
-                    self.filtered_data = filtered
+                    message = self.lookup_data(response, filtered)
             else:
                 message = f"Invalid syntax for command <{self.command}>.\n"
                 message += "Type help for more info."
