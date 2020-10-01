@@ -30,6 +30,6 @@ The application runs like a command-line interface, these are the allowed comman
 * geoip [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Geo-location lookup tool. e.g.: geoip range(0:10) all
 * rdap [&lt;ip&gt; | &lt;range&gt; [&lt;var&gt;] | all]: Registration data access search for IP. e.g.: rdap range(0:10) A1
 * filter &lt;regex:ip&gt;: A regex query to search IP addresses. e.g.: filter .*50
-* save (&lt;var&gt; | all) &lt;type&gt; &lt;filename&gt; [&lt;filetype&gt;]: Save data into a file (default JSON). e.g. save all geoip file json
+* save (&lt;var&gt; | all) (geoip | rdap) &lt;filename&gt; [&lt;filetype&gt;]: Save data into a file (default JSON). e.g. save all geoip file json
 * help: Prints help dialog.
 * exit: Exit.

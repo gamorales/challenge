@@ -42,7 +42,7 @@ class Commands(object):
         geoip [<ip> | <range> [<var>] | all]: Geo-location lookup tool. e.g.: geoip range(0:10) all
         rdap [<ip> | <range> [<var>] | all]: Registration data access search for IP. e.g.: rdap range(0:10) A1
         filter <regex:ip>: A regex query to search IP addresses. e.g.: filter .*50
-        save (<var> | all) <type> <filename> [<filetype>]: Save data into a file (default JSON). e.g. save all geoip file json
+        save (<var> | all) (geoip | rdap) <filename> [<filetype>]: Save data into a file (default JSON). e.g. save all geoip file json
         help: Prints help dialog.
         exit: Exit.
         """
