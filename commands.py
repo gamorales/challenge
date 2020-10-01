@@ -147,10 +147,10 @@ class Commands(object):
                         for _ in lookup_data:
                             yaml.dump(eval(_), outfile)
                     elif filetype == "csv":
-                        writer = csv.DictWriter(outfile, fieldnames=lookup_data.keys())
+                        writer = csv.DictWriter(outfile, fieldnames=eval(lookup_data[0]).keys())
                         writer.writeheader()
                         for index in lookup_data:
-                            writer.writerow(index)
+                            writer.writerow(eval(index))
 
                 message = "File created successfully!"
             else:
