@@ -3,11 +3,12 @@ import csv
 import yaml
 import re
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor
 
-from dialog import ShowMessageDialog
 from load_file import LoadIPFile
 from query_filter import QueryFilter
 from lookup_ip import LookupIP
+from parsing import Parsing
 
 # Number of parameters per function
 PARAMS_QTY = {
@@ -135,22 +136,8 @@ class Commands(object):
             lookup_ip = LookupIP(data, command)
             if lookup_ip:
                 lookup_data = lookup_ip.check_ip_list()
-
-                with open(f"{filename}.{filetype}", "w") as outfile:
-                    if filetype == "json":
-                        outfile.write("[\n")
-                        for _ in lookup_data:
-                            json.dump(eval(_), outfile, indent=4, sort_keys=True)
-                            outfile.write(",")
-                        outfile.write("]")
-                    elif filetype == "yaml":
-                        for _ in lookup_data:
-                            yaml.dump(eval(_), outfile)
-                    elif filetype == "csv":
-                        writer = csv.DictWriter(outfile, fieldnames=eval(lookup_data[0]).keys())
-                        writer.writeheader()
-                        for index in lookup_data:
-                            writer.writerow(eval(index))
+                with ThreadPoolExecutor(max_workers=4, thread_name_prefix='save_file') as executor:
+                    executor.submit(Parsing.save, filename, filetype)
 
                 message = "File created successfully!"
             else:

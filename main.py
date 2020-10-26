@@ -7,6 +7,7 @@ response = {}
 
 
 def main():
+    Commands.print_help()
     global response
 
     while True:
