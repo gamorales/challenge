@@ -10,13 +10,10 @@ class LoadIPFile(object):
     def read_ip_list(self):
         try:
             with open(self.filename) as f:
-                data = f.readlines()
+                data = f.read()
 
             regex = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}")
-            for line in data:
-                matches = regex.findall(line.strip())
-                for match in matches:
-                    self.ip_list.append(match)
+            self.ip_list = regex.findall(data.strip("\n"))
 
         except FileNotFoundError:
             self.ip_list = []
